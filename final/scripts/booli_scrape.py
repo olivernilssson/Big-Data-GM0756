@@ -37,7 +37,7 @@ def total_floors(address):
                         last_vaning = int(match.group())
                         if 'Gatuplan' in rows[0].text:
                             last_vaning += 1
-            print(f"Högsta våning: {last_vaning}")
+            print(f"Number of floors: {last_vaning}")
             return last_vaning
     else:
         print("No table found")
@@ -72,7 +72,8 @@ def get_object_page(soup):
                 'sell_price': None,
                 'ask_price': None,
                 'price_change': None,
-                'price_per_m2': None
+                'price_per_m2': None,
+                'interest_rate': None
             }
             # Loop through the text elements and extract the relevant information with error handling to prevent crashes
             for element in combined_elements:
@@ -95,7 +96,7 @@ def get_object_page(soup):
                     try:
                         area = element.replace('m²', '').replace('\xa0m²', '').strip()
                         apartment['area'] = float(area.replace('½', '')) + 0.5 if '½' in element else float(area)
-                        apartment['price_per_m2'] = apartment['sell_price'] / apartment['area']
+                        apartment['price_per_m2'] = round(apartment['sell_price'] / apartment['area'], 2)
                     except ValueError:
                         apartment['area'] = None
                 elif '\xa0rum' in element:
@@ -111,9 +112,9 @@ def get_object_page(soup):
             total_floors_value = total_floors(apartment['address'])
             if apartment['floor'] is not None and total_floors_value is not None:
                 apartment['total_floors'] = max(apartment['floor'], total_floors_value)
-                apartment['top_floor'] = 1 if apartment['floor'] == apartment['total_floors'] else 0
+                apartment['top_floor'] = int(apartment['floor'] == total_floors_value)
             # Check if the apartment is in the list of elevator apartments and set the elevator value
-            if elevator_apartments is not None:
+            if not elevator_apartments.empty:
                 elevator_apartment = elevator_apartments[(elevator_apartments['address'] == apartment['address'])
                                                          & (elevator_apartments['rooms'] == apartment['rooms'])]
                 if not elevator_apartment.empty:
@@ -121,13 +122,18 @@ def get_object_page(soup):
                 else:
                     apartment['elevator'] = 0
             # Check if the apartment is in the list of balcony apartments and set the elevator value
-            if balcony_apartments is not None:
+            if not balcony_apartments.empty:
                 balcony_apartment = balcony_apartments[(balcony_apartments['address'] == apartment['address'])
                                                        & (balcony_apartments['rooms'] == apartment['rooms'])]
                 if not balcony_apartment.empty:
                     apartment['balcony'] = 1
                 else:
                     apartment['balcony'] = 0
+            # Add interest rate to each apartments sell date. Date is in first column named "Datum" and the interest rate in the second column. Date is only updated once per quarter.
+            if interest_riksbanken is not None:
+                interest_rate = interest_riksbanken[interest_riksbanken['date'] <= apartment['date']]
+                if not interest_rate.empty:
+                    apartment['interest_rate'] = interest_rate.loc[interest_rate.index[-1], 'rate']
             apartments.append(apartment)  # Append the apartment to the list of apartments
     return apartments  # Return the list of apartments to the function caller
 
@@ -259,8 +265,13 @@ def get_all_objects_filter(end_url, file_name):
     return apartments  # Return the DataFrame to the function caller
 
 
-max_sold_date = '2024-05-15'
+max_sold_date = '2024-05-20'
 min_sold_date = '2024-01-01'
+
+# Read xlsx file with interest rates from Riksbanken
+interest_riksbanken = pd.read_excel('final/data/styrrantan-effektiv.xlsx', sheet_name='Reporäntan per förändring')
+# Rename columns to date and rate
+interest_riksbanken.columns = ['date', 'rate']
 
 elevator_apartments = get_all_objects_filter(
     f'sok/slutpriser?areaIds=115329&amenities=buildingHasElevator&maxSoldDate={max_sold_date}&minSoldDate={min_sold_date}&rooms=2,1',
