@@ -267,7 +267,7 @@ def get_all_objects_filter(end_url, file_name):
     return apartments  # Return the DataFrame to the function caller
 
 
-max_sold_date = '2024-05-20'
+max_sold_date = '2024-05-31'
 min_sold_date = '2018-01-01'
 
 # Read xlsx file with interest rates from Riksbanken
