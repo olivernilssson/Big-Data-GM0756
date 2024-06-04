@@ -275,12 +275,12 @@ interest_riksbanken = pd.read_excel('final/data/styrrantan-effektiv.xlsx', sheet
 # Rename columns to date and rate
 interest_riksbanken.columns = ['date', 'rate']
 
-# elevator_apartments = get_all_objects_filter(
-#     f'sok/slutpriser?areaIds=115329&amenities=buildingHasElevator&maxSoldDate={max_sold_date}&minSoldDate={min_sold_date}&rooms=2,1',
-#     'elevator_apartments')
+elevator_apartments = get_all_objects_filter(
+    f'sok/slutpriser?areaIds=115329&amenities=buildingHasElevator&maxSoldDate={max_sold_date}&minSoldDate={min_sold_date}&rooms=2,1',
+    'elevator_apartments')
 
 balcony_apartments = get_all_objects_filter(
     f'sok/slutpriser?areaIds=115329&amenities=hasBalconyOrPatio&maxSoldDate={max_sold_date}&minSoldDate={min_sold_date}&rooms=2,1',
     'balcony_apartments')
 
-# get_all_objects(f'sok/slutpriser?areaIds=115329&maxSoldDate={max_sold_date}&minSoldDate={min_sold_date}&rooms=2,1')
+get_all_objects(f'sok/slutpriser?areaIds=115329&maxSoldDate={max_sold_date}&minSoldDate={min_sold_date}&rooms=2,1')
