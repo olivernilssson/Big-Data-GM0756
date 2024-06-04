@@ -268,7 +268,7 @@ def get_all_objects_filter(end_url, file_name):
 
 
 max_sold_date = '2024-05-20'
-min_sold_date = '2024-01-01'
+min_sold_date = '2018-01-01'
 
 # Read xlsx file with interest rates from Riksbanken
 interest_riksbanken = pd.read_excel('final/data/styrrantan-effektiv.xlsx', sheet_name='Reporäntan per förändring')
