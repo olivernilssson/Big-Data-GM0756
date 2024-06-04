@@ -79,7 +79,8 @@ def get_object_page(soup):
             for element in combined_elements:
                 if 'vån\xa0' in element:
                     try:
-                        apartment['floor'] = int(element.lstrip('vån\xa0'))
+                        floor = element.lstrip('vån\xa0').replace('½', '')
+                        apartment['floor'] = int(floor)
                     except ValueError:
                         apartment['floor'] = None
                 elif 'kr' in element:
@@ -198,7 +199,8 @@ def get_object_page_light(soup):
             for element in text_elements:
                 if 'vån\xa0' in element:
                     try:
-                        apartment['floor'] = int(element.lstrip('vån\xa0'))
+                        floor = element.lstrip('vån\xa0').replace('½', '')
+                        apartment['floor'] = int(floor)
                     except ValueError:
                         apartment['floor'] = None
                 elif 'kr' in element:
@@ -210,7 +212,7 @@ def get_object_page_light(soup):
                     try:
                         area = element.replace('m²', '').replace('\xa0m²', '').strip()
                         apartment['area'] = float(area.replace('½', '')) + 0.5 if '½' in element else float(area)
-                        apartment['price_per_m2'] = apartment['sell_price'] / apartment['area']
+                        apartment['price_per_m2'] = round(apartment['sell_price'] / apartment['area'], 2)
                     except ValueError:
                         apartment
                 elif '\xa0rum' in element:
@@ -273,12 +275,12 @@ interest_riksbanken = pd.read_excel('final/data/styrrantan-effektiv.xlsx', sheet
 # Rename columns to date and rate
 interest_riksbanken.columns = ['date', 'rate']
 
-elevator_apartments = get_all_objects_filter(
-    f'sok/slutpriser?areaIds=115329&amenities=buildingHasElevator&maxSoldDate={max_sold_date}&minSoldDate={min_sold_date}&rooms=2,1',
-    'elevator_apartments')
+# elevator_apartments = get_all_objects_filter(
+#     f'sok/slutpriser?areaIds=115329&amenities=buildingHasElevator&maxSoldDate={max_sold_date}&minSoldDate={min_sold_date}&rooms=2,1',
+#     'elevator_apartments')
 
 balcony_apartments = get_all_objects_filter(
     f'sok/slutpriser?areaIds=115329&amenities=hasBalconyOrPatio&maxSoldDate={max_sold_date}&minSoldDate={min_sold_date}&rooms=2,1',
     'balcony_apartments')
 
-get_all_objects(f'sok/slutpriser?areaIds=115329&maxSoldDate={max_sold_date}&minSoldDate={min_sold_date}&rooms=2,1')
+# get_all_objects(f'sok/slutpriser?areaIds=115329&maxSoldDate={max_sold_date}&minSoldDate={min_sold_date}&rooms=2,1')
